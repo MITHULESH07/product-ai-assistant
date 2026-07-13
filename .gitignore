@@ -1,0 +1,45 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+.pytest_cache/
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Temporary uploads
+data/uploads/*
+!data/uploads/.gitkeep
+
+# Vector databases
+data/chroma_db/*
+!data/chroma_db/.gitkeep
+
+# Generated reports
+data/reports/
+
+# Logs
+*.log
+
+# Ollama and model files
+*.gguf
+models/
