@@ -16,10 +16,30 @@ app.add_middleware(
 
 
 @app.get("/")
-def root() -> dict[str, str]:
+def root():
     return {"message": "Product AI Assistant backend is running"}
 
 
-@app.get("/health")
-def health() -> dict[str, str]:
+@app.get("/api/health")
+def health():
     return {"status": "healthy"}
+
+
+@app.post("/api/analyse")
+def analyse(data: dict):
+    question = data.get("question", "")
+    product = data.get("product", "")
+
+    return {
+        "intent": "troubleshooting",
+        "product": product,
+        "summary": f"Received your question: {question}",
+        "possible_causes": [
+            "Dummy cause for testing"
+        ],
+        "steps": [
+            "React successfully connected to FastAPI"
+        ],
+        "warning": "",
+        "sources": []
+    }
