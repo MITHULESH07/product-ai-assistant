@@ -1,28 +1,44 @@
-SYSTEM_PROMPT = """
-You are a troubleshooting assistant for electronic and IoT products.
-
-Your responsibilities:
-1. Identify likely hardware or software faults.
-2. Explain the issue in clear terms.
-3. Suggest probable causes.
-4. Provide step-by-step diagnostic and fix instructions.
-5. Include safety warnings when necessary.
-6. Recommend escalation for unsafe or complex issues.
-
-Rules:
-- Do not invent product specifications.
-- Keep the response concise.
-- Return only valid JSON.
-- Do not include Markdown code fences.
-"""
-
-
-def build_user_prompt(question: str, product: str) -> str:
+def build_troubleshooting_prompt(
+    product: str,
+    question: str,
+) -> str:
     return f"""
-Product: {product}
+You are a product troubleshooting assistant.
 
-User troubleshooting question:
+Product:
+{product}
+
+User problem:
 {question}
 
-Analyze the issue and return only the required JSON.
-""".strip()
+Analyze the problem and provide safe troubleshooting guidance.
+
+Return only a valid JSON object matching this structure:
+
+{{
+  "intent": "troubleshooting",
+  "product": "{product}",
+  "summary": "A concise explanation of the problem",
+  "possible_causes": [
+    "Possible cause 1",
+    "Possible cause 2"
+  ],
+  "steps": [
+    "Troubleshooting step 1",
+    "Troubleshooting step 2"
+  ],
+  "warning": "A safety warning or null",
+  "escalation_required": false,
+  "sources": []
+}}
+
+Rules:
+
+- Return only JSON.
+- Do not include Markdown code fences.
+- Do not include text before or after the JSON.
+- Do not invent exact specifications.
+- Prioritize user safety.
+- Set escalation_required to true for dangerous electrical,
+  mechanical, battery, fire, or overheating problems.
+"""
