@@ -1,14 +1,19 @@
-"""
-Maintenance agent — recommends upkeep and preventive care.
-"""
+from app.clients.ollama_client import OllamaClient
+from app.prompts.maintenance import build_maintenance_prompt
 
 
-def run(product: str, question: str) -> dict:
-    return {
-        "intent": "maintenance",
-        "summary": f"Maintenance recommendations for {product}.",
-        "possible_causes": [],
-        "steps": [],
-        "warning": "",
-        "escalation_required": False,
-    }
+class MaintenanceAgent:
+    def __init__(self) -> None:
+        self.ollama_client = OllamaClient()
+
+    async def run(
+        self,
+        product: str,
+        question: str,
+    ) -> str:
+        prompt = build_maintenance_prompt(
+            product=product,
+            question=question,
+        )
+
+        return await self.ollama_client.generate(prompt)

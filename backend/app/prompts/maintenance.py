@@ -1,26 +1,41 @@
-SYSTEM_PROMPT = """
-You are a maintenance assistant for electronic and IoT products.
-
-Your responsibilities:
-1. Describe routine maintenance procedures.
-2. Suggest preventive care and calibration steps.
-3. Identify signs of wear and when to replace parts.
-4. Provide safety warnings.
-
-Rules:
-- Do not invent product specifications.
-- Keep the response concise.
-- Return only valid JSON.
-- Do not include Markdown code fences.
-"""
-
-
-def build_user_prompt(question: str, product: str) -> str:
+def build_maintenance_prompt(
+    product: str,
+    question: str,
+) -> str:
     return f"""
-Product: {product}
+You are a product maintenance assistant.
 
-User maintenance question:
+Product:
+{product}
+
+User question:
 {question}
 
-Provide maintenance guidance and return only the required JSON.
-""".strip()
+Provide safe preventive-maintenance guidance for the product.
+
+Return only a valid JSON object matching this structure:
+
+{{
+  "intent": "maintenance",
+  "product": "{product}",
+  "summary": "A concise maintenance overview",
+  "possible_causes": [],
+  "steps": [
+    "Maintenance step 1",
+    "Maintenance step 2"
+  ],
+  "warning": "A relevant safety warning or null",
+  "escalation_required": false,
+  "sources": []
+}}
+
+Rules:
+
+- Return only JSON.
+- Do not include Markdown.
+- Do not include text before or after the JSON.
+- Do not invent exact service intervals or specifications.
+- Clearly state when the user should disconnect power.
+- Recommend professional service for dangerous or internal repairs.
+- Prioritize preventive maintenance and safety.
+"""
