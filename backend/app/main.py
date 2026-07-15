@@ -1,45 +1,41 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes.analysis import router as analysis_router
+from app.api.routes.health import router as health_router
+from app.core.config import settings
+from app.schemas.response import RootResponse
+
+logging.basicConfig(
+    level=getattr(logging, settings.log_level.upper(), logging.INFO),
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
-    title="Product AI Assistant API",
-    version="0.1.0",
+    title=settings.app_title,
+    version=settings.app_version,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+app.include_router(health_router)
+app.include_router(analysis_router)
 
-@app.get("/")
+
+@app.get("/", response_model=RootResponse)
 def root():
-    return {"message": "Product AI Assistant backend is running"}
-
-
-@app.get("/api/health")
-def health():
-    return {"status": "healthy"}
-
-
-@app.post("/api/analyse")
-def analyse(data: dict):
-    question = data.get("question", "")
-    product = data.get("product", "")
-
-    return {
-        "intent": "troubleshooting",
-        "product": product,
-        "summary": f"Received your question: {question}",
-        "possible_causes": [
-            "Dummy cause for testing"
-        ],
-        "steps": [
-            "React successfully connected to FastAPI"
-        ],
-        "warning": "",
-        "sources": []
-    }
+    return RootResponse(
+        message="Product AI Assistant backend is running",
+        version=settings.app_version,
+    )

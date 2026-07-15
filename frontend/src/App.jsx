@@ -1,120 +1,104 @@
 import { useState } from "react";
 import "./App.css";
 import { analyseProblem } from "./services/api.js";
+import Header from "./components/Header.jsx";
+import AssistantForm from "./components/AssistantForm.jsx";
+import ResultPanel from "./components/ResultPanel.jsx";
+import LoadingState from "./components/LoadingState.jsx";
+import ErrorMessage from "./components/ErrorMessage.jsx";
 
 function App() {
   const [product, setProduct] = useState("ESP32");
+  const [assistanceType, setAssistanceType] = useState("auto");
   const [question, setQuestion] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [validationMessage, setValidationMessage] = useState("");
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    if (!question.trim()) {
-      setError("Please enter a question.");
+  async function handleSubmit() {
+    const trimmed = question.trim();
+    if (!trimmed) {
+      setValidationMessage("Please enter a question.");
       return;
     }
 
+    setValidationMessage("");
+    setError("");
+    setResult(null);
+
     try {
       setLoading(true);
-      setError("");
-      setResult(null);
-
-      const data = await analyseProblem(question, product);
+      const data = await analyseProblem(trimmed, product, assistanceType);
       setResult(data);
     } catch (err) {
       console.error(err);
-      setError("Could not connect to the FastAPI backend.");
+      setError(
+        err.response?.data?.detail ||
+          "Could not connect to the backend. Please ensure the FastAPI server is running."
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  return (
-    <main style={{ maxWidth: "800px", margin: "40px auto", padding: "20px" }}>
-      <h1>AI Product Assistance System</h1>
+  function renderResultArea() {
+    if (loading) {
+      return <LoadingState />;
+    }
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: "16px" }}>
-          <label htmlFor="product">Select product</label>
-          <br />
-
-          <select
-            id="product"
-            value={product}
-            onChange={(event) => setProduct(event.target.value)}
-          >
-            <option value="ESP32">ESP32</option>
-            <option value="ESP32-CAM">ESP32-CAM</option>
-            <option value="MG996R">MG996R Servo</option>
-            <option value="MG90S">MG90S Servo</option>
-            <option value="PCA9685">PCA9685</option>
-            <option value="L298N">L298N Motor Driver</option>
-            <option value="Robotic Arm">Robotic Arm</option>
-          </select>
+    if (error) {
+      return (
+        <div className="result-panel-wrapper">
+          <ErrorMessage message={error} />
         </div>
+      );
+    }
 
-        <div style={{ marginBottom: "16px" }}>
-          <label htmlFor="question">Describe your problem</label>
-          <br />
+    if (result) {
+      return <ResultPanel result={result} />;
+    }
 
-          <textarea
-            id="question"
-            rows="5"
-            style={{ width: "100%" }}
-            value={question}
-            onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Example: Why is my servo overheating?"
+    return (
+      <div className="result-empty">
+        <div className="result-empty-icon">&#9881;</div>
+        <p className="result-empty-text">
+          Submit a question to receive AI-powered assistance.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      <Header />
+
+      <div className="dashboard">
+        <div className="form-panel">
+          <AssistantForm
+            product={product}
+            setProduct={setProduct}
+            assistanceType={assistanceType}
+            setAssistanceType={setAssistanceType}
+            question={question}
+            setQuestion={setQuestion}
+            image={image}
+            setImage={setImage}
+            imagePreview={imagePreview}
+            setImagePreview={setImagePreview}
+            onSubmit={handleSubmit}
+            loading={loading}
+            validationMessage={validationMessage}
           />
         </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Analysing..." : "Analyse Problem"}
-        </button>
-      </form>
-
-      {error && <p>{error}</p>}
-
-      {result && (
-        <section style={{ marginTop: "24px" }}>
-          <h2>Analysis</h2>
-
-          <p>
-            <strong>Intent:</strong> {result.intent}
-          </p>
-
-          <p>
-            <strong>Product:</strong> {result.product}
-          </p>
-
-          <p>
-            <strong>Summary:</strong> {result.summary}
-          </p>
-
-          <h3>Possible causes</h3>
-          <ul>
-            {result.possible_causes?.map((cause, index) => (
-              <li key={index}>{cause}</li>
-            ))}
-          </ul>
-
-          <h3>Recommended steps</h3>
-          <ol>
-            {result.steps?.map((step, index) => (
-              <li key={index}>{step}</li>
-            ))}
-          </ol>
-
-          {result.warning && (
-            <p>
-              <strong>Warning:</strong> {result.warning}
-            </p>
-          )}
-        </section>
-      )}
-    </main>
+        <div className="result-panel-wrapper">
+          {renderResultArea()}
+        </div>
+      </div>
+    </div>
   );
 }
 
