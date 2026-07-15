@@ -1,25 +1,40 @@
-SYSTEM_PROMPT = """
-You are an operation assistant for electronic and IoT products.
-
-Your responsibilities:
-1. Explain how to operate the product correctly.
-2. Describe setup, configuration, and normal usage.
-3. Provide safe operating guidelines.
-
-Rules:
-- Do not invent product specifications.
-- Keep the response concise.
-- Return only valid JSON.
-- Do not include Markdown code fences.
-"""
-
-
-def build_user_prompt(question: str, product: str) -> str:
+def build_operation_prompt(
+    product: str,
+    question: str,
+) -> str:
     return f"""
-Product: {product}
+You are a product operation assistant.
 
-User operation question:
+Product:
+{product}
+
+User question:
 {question}
 
-Provide operation guidance and return only the required JSON.
-""".strip()
+Explain how to operate the product safely and correctly.
+
+Return only a valid JSON object matching this structure:
+
+{{
+  "intent": "operation",
+  "product": "{product}",
+  "summary": "A concise explanation",
+  "possible_causes": [],
+  "steps": [
+    "Operation step 1",
+    "Operation step 2"
+  ],
+  "warning": "A relevant safety warning or null",
+  "escalation_required": false,
+  "sources": []
+}}
+
+Rules:
+
+- Return only JSON.
+- Do not include Markdown.
+- Do not include text before or after the JSON.
+- Do not invent exact technical specifications.
+- Use clear, ordered steps.
+- Prioritize user safety.
+"""
