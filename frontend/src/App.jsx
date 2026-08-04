@@ -6,10 +6,17 @@ import AssistantForm from "./components/AssistantForm.jsx";
 import ResultPanel from "./components/ResultPanel.jsx";
 import LoadingState from "./components/LoadingState.jsx";
 import ErrorMessage from "./components/ErrorMessage.jsx";
+import DocumentManager from "./components/DocumentManager.jsx";
+
+const TABS = [
+  { id: "assistance", label: "Assistance" },
+  { id: "documents", label: "Documents" },
+];
 
 function App() {
+  const [activeTab, setActiveTab] = useState("assistance");
   const [product, setProduct] = useState("ESP32");
-  const [assistanceType, setAssistanceType] = useState("auto");
+  const [assistanceType, setAssistanceType] = useState("troubleshooting");
   const [question, setQuestion] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -31,7 +38,7 @@ function App() {
 
     try {
       setLoading(true);
-      const data = await analyseProblem(trimmed, product, assistanceType);
+      const data = await analyseProblem(trimmed, product, assistanceType, image);
       setResult(data);
     } catch (err) {
       console.error(err);
@@ -75,29 +82,48 @@ function App() {
     <div className="app">
       <Header />
 
-      <div className="dashboard">
-        <div className="form-panel">
-          <AssistantForm
-            product={product}
-            setProduct={setProduct}
-            assistanceType={assistanceType}
-            setAssistanceType={setAssistanceType}
-            question={question}
-            setQuestion={setQuestion}
-            image={image}
-            setImage={setImage}
-            imagePreview={imagePreview}
-            setImagePreview={setImagePreview}
-            onSubmit={handleSubmit}
-            loading={loading}
-            validationMessage={validationMessage}
-          />
-        </div>
-
-        <div className="result-panel-wrapper">
-          {renderResultArea()}
-        </div>
+      <div className="tabs" role="tablist">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            className={`tab-btn${activeTab === tab.id ? " tab-btn--active" : ""}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
+
+      {activeTab === "documents" ? (
+        <DocumentManager />
+      ) : (
+        <div className="dashboard">
+          <div className="form-panel">
+            <AssistantForm
+              product={product}
+              setProduct={setProduct}
+              assistanceType={assistanceType}
+              setAssistanceType={setAssistanceType}
+              question={question}
+              setQuestion={setQuestion}
+              image={image}
+              setImage={setImage}
+              imagePreview={imagePreview}
+              setImagePreview={setImagePreview}
+              onSubmit={handleSubmit}
+              loading={loading}
+              validationMessage={validationMessage}
+            />
+          </div>
+
+          <div className="result-panel-wrapper">
+            {renderResultArea()}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

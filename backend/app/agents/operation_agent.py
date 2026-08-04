@@ -1,19 +1,19 @@
-from app.clients.ollama_client import OllamaClient
-from app.prompts.operation import build_operation_prompt
+from app.clients import llm_factory
+from app.services.image_service import ProcessedImage
 
 
 class OperationAgent:
-    def __init__(self) -> None:
-        self.ollama_client = OllamaClient()
-
     async def run(
         self,
         product: str,
         question: str,
-    ) -> str:
-        prompt = build_operation_prompt(
-            product=product,
+        context: str | None = None,
+        image: ProcessedImage | None = None,
+    ) -> dict:
+        return await llm_factory.generate_assistance(
             question=question,
+            product=product,
+            assistance_type="operation",
+            context=context,
+            image=image,
         )
-
-        return await self.ollama_client.generate(prompt)

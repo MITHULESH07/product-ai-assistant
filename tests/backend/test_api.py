@@ -1,7 +1,31 @@
+import io
+from unittest.mock import AsyncMock, patch
+
+import pytest
+from PIL import Image
 from fastapi.testclient import TestClient
 from starlette.routing import BaseRoute
 
 from app.main import app
+
+
+@pytest.fixture(autouse=True)
+def _mock_llm():
+    with patch("app.clients.llm_factory.generate_assistance") as mock:
+        async def _side_effect(**kwargs):
+            return {
+                "intent": kwargs.get("assistance_type", "troubleshooting"),
+                "product": kwargs.get("product", ""),
+                "summary": "Mock analysis summary",
+                "possible_causes": ["Mock cause 1"],
+                "steps": ["Mock step 1"],
+                "warning": "",
+                "escalation_required": False,
+                "sources": [],
+            }
+        mock.side_effect = _side_effect
+        yield
+
 
 client = TestClient(app)
 
@@ -75,6 +99,7 @@ class TestAnalyse:
         response = client.post("/api/analyse", json={
             "question": "How do I set up the ESP32?",
             "product": "ESP32",
+            "assistance_type": "operation",
         })
         assert response.status_code == 200
 
@@ -109,3 +134,80 @@ class TestAnalyse:
     def test_only_one_analyse_route_exists(self):
         paths = _all_paths(app.routes)
         assert paths.count("/api/analyse") == 1
+
+
+class TestAnalyseWithImage:
+    def test_multipart_without_image(self):
+        buf = io.BytesIO(b"")
+        response = client.post(
+            "/api/analyse",
+            data={
+                "question": "How do I fix this?",
+                "product": "ESP32",
+                "assistance_type": "troubleshooting",
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "summary" in data
+
+    def test_multipart_with_valid_jpeg(self):
+        from PIL import Image
+
+        buf = io.BytesIO()
+        img = Image.new("RGB", (64, 64), color="red")
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+
+        response = client.post(
+            "/api/analyse",
+            data={
+                "question": "What is wrong with this board?",
+                "product": "ESP32",
+                "assistance_type": "troubleshooting",
+            },
+            files={"file": ("photo.jpg", buf, "image/jpeg")},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "summary" in data
+
+    def test_multipart_with_invalid_file_type_rejected(self):
+        response = client.post(
+            "/api/analyse",
+            data={
+                "question": "What is wrong?",
+                "product": "ESP32",
+                "assistance_type": "troubleshooting",
+            },
+            files={"file": ("doc.pdf", b"%PDF-1.4 fake", "application/pdf")},
+        )
+        assert response.status_code == 400
+        assert "Only images" in response.json()["detail"]
+
+    def test_multipart_missing_question_rejected(self):
+        buf = io.BytesIO()
+        img = Image.new("RGB", (32, 32), color="blue")
+        img.save(buf, format="JPEG")
+        buf.seek(0)
+
+        response = client.post(
+            "/api/analyse",
+            data={
+                "product": "ESP32",
+                "assistance_type": "troubleshooting",
+            },
+            files={"file": ("photo.jpg", buf, "image/jpeg")},
+        )
+        assert response.status_code == 422
+
+    def test_multipart_empty_question_rejected(self):
+        response = client.post(
+            "/api/analyse",
+            data={
+                "question": "",
+                "product": "ESP32",
+                "assistance_type": "troubleshooting",
+            },
+        )
+        assert response.status_code == 422

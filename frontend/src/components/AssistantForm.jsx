@@ -1,23 +1,6 @@
 import "./AssistantForm.css";
 import ImageUpload from "./ImageUpload";
-
-const PRODUCTS = [
-  "ESP32",
-  "ESP32-CAM",
-  "MG90S Servo",
-  "MG996R Servo",
-  "PCA9685 Servo Driver",
-  "L298N Motor Driver",
-  "Robotic Arm",
-  "Warehouse Rover",
-];
-
-const ASSISTANCE_TYPES = [
-  { value: "auto", label: "Auto (Detect)" },
-  { value: "operation", label: "Operation" },
-  { value: "troubleshooting", label: "Troubleshooting" },
-  { value: "maintenance", label: "Maintenance" },
-];
+import { PRODUCTS, ASSISTANCE_TYPES } from "../constants.js";
 
 function AssistantForm({
   product,

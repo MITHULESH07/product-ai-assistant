@@ -1,5 +1,4 @@
-from app.schemas.request import AnalysisRequest
-from app.schemas.response import AnalysisResponse
+from app.schemas.analysis import AnalysisRequest, AnalysisResponse
 
 __all__ = [
     "AnalysisRequest",
