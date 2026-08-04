@@ -1,0 +1,140 @@
+.result-panel {
+  padding: 24px;
+}
+
+.result-heading {
+  font-size: 20px;
+  margin: 0 0 16px;
+  color: var(--text-h);
+}
+
+.result-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.badge-intent {
+  background: rgba(99, 102, 241, 0.12);
+  color: #4f46e5;
+}
+
+.badge-product {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
+.badge-type {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge-intent {
+    background: rgba(99, 102, 241, 0.2);
+    color: #a5b4fc;
+  }
+
+  .badge-product {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+  }
+
+  .badge-type {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+  }
+}
+
+.result-section {
+  margin-bottom: 20px;
+}
+
+.result-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--text-h);
+}
+
+.result-summary {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0;
+}
+
+.result-list {
+  margin: 0;
+  padding: 0 0 0 20px;
+}
+
+.result-list--ordered {
+  padding-left: 20px;
+}
+
+.result-list-item {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.result-section--warning {
+  padding: 14px 16px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 10px;
+}
+
+.result-warning {
+  font-size: 14px;
+  color: #92400e;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .result-warning {
+    color: #fcd34d;
+  }
+}
+
+.result-escalation {
+  font-size: 14px;
+  color: var(--text);
+  margin: 0;
+}
+
+.result-sources {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.result-source-item {
+  font-size: 13px;
+  color: var(--text);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-source-item:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .result-panel {
+    padding: 20px 16px;
+  }
+}
